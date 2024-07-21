@@ -9,19 +9,19 @@ const chalk = require("chalk");
 // TODO: Move to utils
 const figlet = require("figlet");
 figlet("XTendu", function (err, data) {
-	if (err) {
-		console.log("Something went wrong...");
-		console.dir(err);
-		return;
-	}
-	console.log(data);
+  if (err) {
+    console.log("Something went wrong...");
+    console.dir(err);
+    return;
+  }
+  console.log(data);
 });
 
 const clientIntents = [
-	GatewayIntentBits.MessageContent,
-	GatewayIntentBits.Guilds,
-	GatewayIntentBits.GuildMessages,
-	GatewayIntentBits.GuildMembers,
+  GatewayIntentBits.MessageContent,
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.GuildMembers,
 ];
 // clientIntents may need to be updated overtime to accomodate for bots new needs
 
@@ -35,11 +35,11 @@ client.commandArray = [];
 
 const functionFolders = fs.readdirSync(`./src/functions`);
 for (const folder of functionFolders) {
-	const functionFiles = sanitizeJSFiles(
-		fs.readdirSync(`./src/functions/${folder}`)
-	);
-	for (const file of functionFiles)
-		require(`./functions/${folder}/${file}`)(client);
+  const functionFiles = sanitizeJSFiles(
+    fs.readdirSync(`./src/functions/${folder}`)
+  );
+  for (const file of functionFiles)
+    require(`./functions/${folder}/${file}`)(client);
 }
 
 client.handleEvents();
@@ -52,5 +52,11 @@ client.login(config.botToken);
 /*-------------------------*/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 (async () => {
-	await connect(config.mongoURI).catch(console.error);
+  try {
+    await connect(config.mongoURI);
+  } catch (error) {
+    console.error(error);
+    // Handle the error appropriately, e.g., exit the process
+    process.exit(1);
+  }
 })();
