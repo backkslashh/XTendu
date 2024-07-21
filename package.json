@@ -1,0 +1,22 @@
+{
+	"name": "xtendu",
+	"version": "0.0.1",
+	"main": "src/index.js",
+	"scripts": {
+		"start": "node ."
+	},
+	"keywords": [],
+	"author": "Backkslashh",
+	"license": "ISC",
+	"description": "",
+	"dependencies": {
+		"@discordjs/rest": "^2.3.0",
+		"ascii-table3": "^0.9.0",
+		"chalk": "^4",
+		"discord-api-types": "^0.37.91",
+		"discord.js": "^14.15.3",
+		"dotenv": "^16.4.5",
+		"figlet": "^1.7.0",
+		"mongoose": "^8.5.1"
+	}
+}
