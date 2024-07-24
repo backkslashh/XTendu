@@ -3,6 +3,7 @@ const {
 	ApplicationCommandType,
 	ContextMenuCommandBuilder,
 } = require("discord.js");
+const { legacyExecute } = require("./ping");
 module.exports = {
 	data: new ContextMenuCommandBuilder()
 		.setName("getAvatar")
