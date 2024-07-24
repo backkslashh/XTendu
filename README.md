@@ -25,3 +25,5 @@ Clone this repo, and add a config.json file and add the following:
 	"prefix": "putYourPrefixHereForLegacyCommands"
 }
 ```
+
+In your console, run `npm i` to install all needed dependencies. To start up the bot, run `node .`
