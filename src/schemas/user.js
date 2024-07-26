@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 
 const userSchema = new Schema({
-	userID: Number,
+	userID: { type: Number, index: { unique: true, dropDups: true } },
 	currency: Number,
 });
 

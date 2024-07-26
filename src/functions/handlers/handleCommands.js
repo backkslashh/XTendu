@@ -45,10 +45,12 @@ function loadCommands(client, commandFolders) {
 
 		for (const file of commandFiles) {
 			const command = require(`../../commands/${folder}/${file}`);
-			commands.set(command.data.name, command);
-			commandArray.push(command.data.toJSON());
-			if (handlerLogs) {
-				commandStatus.push([command.data.name, "✅"]);
+			if (!command.disabled) {
+				commands.set(command.data.name, command);
+				commandArray.push(command.data.toJSON());
+				if (handlerLogs) {
+					commandStatus.push([command.data.name, "✅"]);
+				}
 			}
 		}
 	}
