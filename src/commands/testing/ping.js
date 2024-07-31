@@ -16,10 +16,14 @@ module.exports = {
 			clientPing =
 				message.createdTimestamp - interaction.createdTimestamp;
 		} else {
-			clientPing = "N/A"; // or handle the error as appropriate
+			clientPing = "N/A";
 		}
 
-		const newMessage = `API Latency: ${(APILatency!==-1)? APILatency: 'Still establishing a connection! Please wait for some time before running the command!'}\nClient Ping: ${clientPing}`;
+		const newMessage = `API Latency: ${
+			APILatency !== -1
+				? APILatency
+				: "Still establishing a connection! Please wait for some time before running the command!"
+		}\nClient Ping: ${clientPing}`;
 
 		await interaction.editReply({
 			content: newMessage,
@@ -28,7 +32,11 @@ module.exports = {
 	legacyExecute(message, args, client) {
 		const APILatency = client.ws.ping;
 		message.reply({
-			content: `APILatency: ${(APILatency!==-1)? APILatency: 'Still establishing a connection! Please wait for some time before running the command!'}\nClient Ping: Client ping is only available for slash commands! Run /ping to see client ping.`,
+			content: `APILatency: ${
+				APILatency !== -1
+					? APILatency
+					: "Still establishing a connection! Please wait for some time before running the command!"
+			}\nClient Ping: Client ping is only available for slash commands! Run /ping to see client ping.`,
 		});
 	},
 };

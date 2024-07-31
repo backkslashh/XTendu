@@ -13,6 +13,7 @@ module.exports = class User {
 			userID: this.userId,
 			currency: 500,
 			jobID: 0, // A job ID of 0 represents no job
+			strength: 10,
 			intelligence: 10,
 			level: 1,
 			xp: 0,
