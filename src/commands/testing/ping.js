@@ -16,7 +16,7 @@ module.exports = {
 			clientPing =
 				message.createdTimestamp - interaction.createdTimestamp;
 		} else {
-			clientPing = "N/A"; // or handle the error as appropriate
+			clientPing = "N/A";
 		}
 
 		const newMessage = `API Latency: ${
