@@ -12,6 +12,17 @@ module.exports = class User {
 		const userDocumentModel = new userSchema({
 			userID: this.userId,
 			currency: 500,
+			jobID: 0, // A job ID of 0 represents no job
+			intelligence: 10,
+			level: 1,
+			xp: 0,
+			inventory: {
+				food: [],
+				art: [],
+			},
+			stock: [],
+			totalIncomeThisWeek: 500,
+			expensesThisWeek: 0,
 		});
 		userDocumentModel.save();
 		return true;
@@ -53,4 +64,6 @@ module.exports = class User {
 	async subtractCurrency(amount) {
 		await this.addCurrency(-1 * amount);
 	}
+
+	async getJobStringFromID() {}
 };
