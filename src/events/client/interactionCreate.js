@@ -1,5 +1,7 @@
 const { bold } = require("chalk");
 const { InteractionType } = require("discord.js");
+const { pleaseRegister } = require("../../utils/filterFunctions");
+const User = require("../../utils/userClass");
 
 module.exports = {
 	name: "interactionCreate",
@@ -75,6 +77,11 @@ module.exports = {
 		const command = commands.get(commandName);
 
 		if (!command) return;
+		if (command.economyBased) {
+			user = new User(interaction.user.id);
+			await pleaseRegister(user, interaction);
+		}
+
 		try {
 			await command.execute(interaction, client);
 		} catch (error) {
