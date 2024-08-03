@@ -1,6 +1,5 @@
 [MOST IMPORTANT]:
 
--   Add `economyBased` property to command handler. (Makes sure users are registered before running the command)
 -   Add methods to the `User` class for new userSchema
 -   Create job schema.
 -   Create job class

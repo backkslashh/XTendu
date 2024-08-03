@@ -20,6 +20,7 @@ const userSchema = new Schema({
 	inventory: {
 		food: [{ type: Number }],
 		art: [{ type: Number }],
+		permits: [{ type: Number }],
 	},
 	stock: [
 		{
