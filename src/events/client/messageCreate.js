@@ -1,5 +1,5 @@
 const chalk = require("chalk");
-const { prefix } = require("../../config.json");
+const { prefix, administrators } = require("../../config.json");
 const { pleaseRegister } = require("../../utils/filterFunctions");
 const User = require("../../utils/userClass");
 
@@ -21,8 +21,18 @@ module.exports = {
 			await pleaseRegister(user, message);
 		}
 
+		function checkAdministrator() {
+			if (command.administratorOnly) {
+				if (!administrators.includes(message.author.id)) {
+					message.reply("You are not permitted to run this command!");
+					return false;
+				}
+			}
+		}
+
 		try {
 			if (typeof command.legacyExecute === "function") {
+				if (!checkAdministrator()) return;
 				command.legacyExecute(message, args, client);
 			} else {
 				message.reply(
