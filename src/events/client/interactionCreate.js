@@ -2,6 +2,7 @@ const { bold } = require("chalk");
 const { InteractionType } = require("discord.js");
 const { pleaseRegister } = require("../../utils/filterFunctions");
 const User = require("../../utils/userClass");
+const { administrators } = require("../../config.json");
 
 module.exports = {
 	name: "interactionCreate",
@@ -82,7 +83,12 @@ module.exports = {
 			const documentExists = await pleaseRegister(user, interaction);
 			if (!documentExists) return;
 		}
-
+		if (command.administratorOnly) {
+			if (!administrators.includes(interaction.user.id)) {
+				interaction.reply("You are not permitted to run this command!");
+				return;
+			}
+		}
 		try {
 			await command.execute(interaction, client);
 		} catch (error) {
