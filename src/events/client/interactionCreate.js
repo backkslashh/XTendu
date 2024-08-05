@@ -79,7 +79,8 @@ module.exports = {
 		if (!command) return;
 		if (command.economyBased) {
 			user = new User(interaction.user.id);
-			await pleaseRegister(user, interaction);
+			const documentExists = await pleaseRegister(user, interaction);
+			if (!documentExists) return;
 		}
 
 		try {
