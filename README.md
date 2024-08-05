@@ -14,7 +14,7 @@ Here are some features it has (or I plan to have in the future):
 
 ## How to set up XTendu
 
-Clone this repo, and add a config.json file and add the following:
+Clone this repo, and add a config.json file with the following:
 
 ```
 {
@@ -27,6 +27,7 @@ Clone this repo, and add a config.json file and add the following:
 }
 ```
 
+Make sure you have NodeJS installed on your computer.
 In your console, run `npm i` to install all needed dependencies. To start up the bot, run `node .`
 
 # Development Process
@@ -35,7 +36,7 @@ When developing, make sure you did all of the steps above.
 
 ## Take Note of the Following
 
--   When updating userSchema model, make sure userClass manifest model matches up.
+-   When updating userSchema model, make sure userClass manifest model matches up\*
 -   All classes will return `false` when a document or property does not exist.
 -   All commands WILL have to be compatible with slash commands\*, but not all commands have to be compatible with legacy (Running the command with prefix)
 
