@@ -32,7 +32,8 @@ module.exports = {
 
 		try {
 			if (typeof command.legacyExecute === "function") {
-				if (!checkAdministrator()) return;
+				const isAdmin = checkAdministrator();
+				if (!isAdmin) return;
 				command.legacyExecute(message, args, client);
 			} else {
 				message.reply(
