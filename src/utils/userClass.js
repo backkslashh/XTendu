@@ -53,11 +53,19 @@ module.exports = class User {
 	 */
 	async updateNumberatedStat(statName, newValue) {
 		if (!this.#isValidStat(statName)) {
-			throw new Error("Stat is not invalid");
+			throw new Error("Stat is invalid");
 		}
 		const userDocument = await this.getUserDocument();
 		userDocument[statName] = newValue;
 		await userDocument.save();
+	}
+
+	async getStat(statName) {
+		if (!this.#isValidStat(statName)) {
+			throw new Error("Stat is invalid");
+		}
+		const userDocument = await this.getUserDocument();
+		return userDocument;
 	}
 
 	async userExists() {
