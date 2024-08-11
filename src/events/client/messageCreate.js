@@ -28,6 +28,7 @@ module.exports = {
 					return false;
 				}
 			}
+			return true;
 		}
 
 		try {

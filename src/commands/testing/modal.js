@@ -7,6 +7,7 @@ const {
 } = require("discord.js");
 
 module.exports = {
+	disabled: true,
 	data: new SlashCommandBuilder()
 		.setName("modal")
 		.setDescription("Returns a modal"),

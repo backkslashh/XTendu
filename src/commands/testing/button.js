@@ -6,6 +6,7 @@ const {
 } = require("discord.js");
 
 module.exports = {
+	disabled: true,
 	data: new SlashCommandBuilder()
 		.setName("button")
 		.setDescription("Testing Buttons"),
