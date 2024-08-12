@@ -1,5 +1,7 @@
 # XTendu
 
+Official Bot Invite: https://discord.com/oauth2/authorize?client_id=1256089145286066226&permissions=8&integration_type=0&scope=bot+applications.commands
+
 XTendu is an economy based discord bot. It is currently in beta.
 Here are some features it has (or I plan to have in the future):
 
@@ -12,7 +14,7 @@ Here are some features it has (or I plan to have in the future):
 -   Taxes
 -   Gambling
 
-## How to set up XTendu
+## How to set up XTendu for development or personal use
 
 Clone this repo, and add a config.json file with the following:
 
@@ -24,8 +26,16 @@ Clone this repo, and add a config.json file with the following:
 	"clientId": "theClientIDOfYourDiscordBot",
 	"guildId": "theGuildIDOfYourServer",
 	"prefix": "putYourPrefixHereForLegacyCommands"
+	"administrators": [
+		"putAdminUserIDHere",
+		"if you have any other admins, put them here"
+	]
 }
 ```
+
+Administrators have access to the following:
+Ability to register or unregister other users,
+Ability to add any amount of currency to their account.
 
 Make sure you have NodeJS installed on your computer.
 In your console, run `npm i` to install all needed dependencies. To start up the bot, run `node .`
