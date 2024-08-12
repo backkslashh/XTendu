@@ -12,7 +12,7 @@ module.exports = {
 		const user = new User(authorUserID);
 
 		interaction.reply({
-			content: `Your balance is: ${await user.getCurrency()}`,
+			content: `Your balance is: ${await user.getStat("currency")}`,
 		});
 	},
 	async legacyExecute(message, args, client) {
@@ -22,7 +22,7 @@ module.exports = {
 		if (!(await pleaseRegister(user, message))) return;
 
 		message.reply({
-			content: `Your balance is: ${await user.getCurrency()}`,
+			content: `Your balance is: ${await user.getStat("currency")}`,
 		});
 	},
 };

@@ -5,6 +5,11 @@ reqNumber = {
 	required: true,
 };
 
+const inventoryItemSchema = new Schema({
+	id: { type: Number, required: true },
+	amount: { type: Number, required: true },
+});
+
 const userSchema = new Schema({
 	userID: {
 		type: Number,
@@ -18,8 +23,8 @@ const userSchema = new Schema({
 	level: reqNumber,
 	xp: reqNumber,
 	inventory: {
-		food: [{ type: Number }],
-		art: [{ type: Number }],
+		food: [inventoryItemSchema],
+		art: [inventoryItemSchema],
 		permits: [{ type: Number }],
 	},
 	stock: [

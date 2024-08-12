@@ -1,6 +1,6 @@
 const userSchema = require("../schemas/user");
 const { percentTaxed } = require("../config.json");
-const user = require("../schemas/user");
+const { TOTAL_INCOME_THIS_WEEK } = require("../utils/userStatsEnum");
 
 module.exports = class User {
 	constructor(userID) {
@@ -28,7 +28,7 @@ module.exports = class User {
 			totalIncomeThisWeek: 500,
 			expensesThisWeek: 0,
 		});
-		userDocumentModel.save();
+		await userDocumentModel.save();
 		return true;
 	}
 
@@ -51,46 +51,48 @@ module.exports = class User {
 	 * @param {String} statName
 	 * @param {Number} newValue
 	 */
-	async updateNumberatedStat(statName, newValue) {
+	async updateNumericalStat(statName, newValue) {
 		if (!this.#isValidStat(statName)) {
-			throw new Error("Stat is invalid");
+			throw new Error("Attempted to update stat that does not exist.");
 		}
 		const userDocument = await this.getUserDocument();
 		userDocument[statName] = newValue;
 		await userDocument.save();
 	}
 
+	/**
+	 *
+	 * @param {String} statName
+	 * @returns {any}
+	 */
 	async getStat(statName) {
 		if (!this.#isValidStat(statName)) {
 			throw new Error("Stat is invalid");
 		}
 		const userDocument = await this.getUserDocument();
-		return userDocument;
+		return userDocument[statName];
 	}
 
+	/**
+	 *
+	 * @returns {Boolean}
+	 */
 	async userExists() {
-		try {
-			const user = await this.getUserDocument();
-			return user !== null;
-		} catch (error) {
-			console.error(`Error checking if user exists: ${error}`);
-			throw new Error("Failed to check if user exists");
-		}
+		const user = await this.getUserDocument();
+		return user !== null;
 	}
 
 	async getUserDocument() {
 		return await userSchema.findOne({ userID: this.userID });
 	}
 
-	async getCurrency() {
-		const user = await this.getUserDocument();
-		return user ? user.currency : false;
-	}
-
 	/**
 	 * @deprecated When setting curency, use updateNumeratedStat("currency", number). Will be removed after official release of XTendu.
 	 */
 	async setCurrency(amount) {
+		console.warn(
+			`WARNING: the 'setCurrency' function is now deprecated. Please use updateNumericalStat("currency", amount)`
+		);
 		await userSchema.updateOne(
 			{ userID: this.userID },
 			{ $set: { currency: amount } },
@@ -105,9 +107,18 @@ module.exports = class User {
 	 */
 	async addCurrency(amount) {
 		const user = await this.getUserDocument();
+
 		const currentCurrency = user ? user.currency : 0;
 		const newCurrency = currentCurrency + amount;
-		await this.updateNumberatedStat("currency", newCurrency);
+
+		await this.updateNumericalStat("currency", newCurrency);
+
+		const incomeThisWeek = await this.getStat(TOTAL_INCOME_THIS_WEEK);
+		await this.updateNumericalStat(
+			TOTAL_INCOME_THIS_WEEK,
+			incomeThisWeek + amount
+		);
+
 		return newCurrency;
 	}
 
@@ -124,52 +135,14 @@ module.exports = class User {
 		// TODO
 	}
 
-	/**
-	 * Returns the strength of the user
-	 * @returns {Number}
-	 */
-	async getStrength() {
-		const user = await this.getUserDocument();
-		return user ? user.strength : false;
-	}
-
-	async getIntelligence() {
-		const user = await this.getUserDocument();
-		return user ? user.intelligence : false;
-	}
-
-	async getLevel() {
-		const user = await this.getUserDocument();
-		return user ? user.level : false;
-	}
-
-	async getXP() {
-		const user = await this.getUserDocument();
-		return user ? user.xp : false;
-	}
-
-	async getInventory() {
-		const user = await this.getUserDocument();
-		return user ? user.invetory : false;
-	}
-
-	async getUserStocks() {
-		const user = await this.getUserDocument();
-		return user ? user.stocks : false;
-	}
-
-	async getIncomeThisWeek() {
-		const user = await this.getUserDocument();
-		return user ? user.totalIncomeThisWeek : false;
-	}
-
 	async getTaxOwed() {
-		const income = this.getIncomeThisWeek();
+		const income = await this.getStat(TOTAL_INCOME_THIS_WEEK);
 		return income * percentTaxed * 0.01; // 0.01 to convert percent to decimal
 	}
 
 	async taxUser() {
-		const amountOwed = this.getTaxOwed();
-		return this.subtractCurrency(amountOwed);
+		const amountOwed = await this.getTaxOwed(TOTAL_INCOME_THIS_WEEK);
+		await this.updateNumericalStat(TOTAL_INCOME_THIS_WEEK, 0);
+		return await this.subtractCurrency(amountOwed);
 	}
 };
