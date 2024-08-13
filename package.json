@@ -3,7 +3,8 @@
 	"version": "0.0.1",
 	"main": "src/index.js",
 	"scripts": {
-		"start": "node ."
+		"start": "node .",
+		"test": "jest"
 	},
 	"keywords": [],
 	"author": "Backkslashh",
@@ -18,5 +19,8 @@
 		"dotenv": "^16.4.5",
 		"figlet": "^1.7.0",
 		"mongoose": "^8.5.1"
+	},
+	"devDependencies": {
+		"jest": "^29.7.0"
 	}
 }

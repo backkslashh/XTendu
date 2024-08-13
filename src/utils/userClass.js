@@ -37,7 +37,7 @@ module.exports = class User {
 	 * @param {String} stat
 	 * @returns {Boolean}
 	 */
-	#isValidStat(stat) {
+	isNumericalStat(stat) {
 		const validStats = Object.keys(userSchema.schema.paths).filter(
 			(field) => {
 				return userSchema.schema.paths[field].instance === "Number";
@@ -46,13 +46,24 @@ module.exports = class User {
 		return validStats.includes(stat);
 	}
 
+	isStat(stat) {
+		const allFields = Object.keys(userSchema.schema.paths);
+
+		// Create a set of top-level fields
+		const topLevelFields = new Set(
+			allFields.map((field) => field.split(".")[0])
+		);
+		// Check if the given stat is a top-level field
+		return topLevelFields.has(stat);
+	}
+
 	/**
 	 *
 	 * @param {String} statName
 	 * @param {Number} newValue
 	 */
 	async updateNumericalStat(statName, newValue) {
-		if (!this.#isValidStat(statName)) {
+		if (!this.isNumericalStat(statName)) {
 			throw new Error("Attempted to update stat that does not exist.");
 		}
 		const userDocument = await this.getUserDocument();
@@ -66,7 +77,7 @@ module.exports = class User {
 	 * @returns {any}
 	 */
 	async getStat(statName) {
-		if (!this.#isValidStat(statName)) {
+		if (!this.isNumericalStat(statName)) {
 			throw new Error("Stat is invalid");
 		}
 		const userDocument = await this.getUserDocument();
