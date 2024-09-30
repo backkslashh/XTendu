@@ -25,7 +25,7 @@ Clone this repo, and add a config.json file with the following:
 	"mongoURI": "yourMongoURIHere",
 	"clientId": "theClientIDOfYourDiscordBot",
 	"guildId": "theGuildIDOfYourServer",
-	"prefix": "putYourPrefixHereForLegacyCommands"
+	"prefix": "putYourPrefixHereForLegacyCommands",
 	"administrators": [
 		"putAdminUserIDHere",
 		"if you have any other admins, put them here"
