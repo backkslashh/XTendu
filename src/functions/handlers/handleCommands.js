@@ -48,13 +48,11 @@ function loadCommands(client, commandFolders) {
 			if (!command.disabled) {
 				commands.set(command.data.name, command);
 				commandArray.push(command.data.toJSON());
-				if (handlerLogs) {
-					commandStatus.push([command.data.name, "✅"]);
-				}
+				commandStatus.push([command.data.name, "✅"]);
 			}
 		}
 	}
-
+	if(!handlerLogs) return
 	console.log(createCommandStatusTable(commandStatus));
 }
 

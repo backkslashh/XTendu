@@ -1,6 +1,7 @@
 const { readdirSync } = require("fs");
 const { sanitizeJSFiles } = require("../../utils/filterFunctions");
 const { italic, bold } = require("chalk");
+const { handlerLogs } = require("../../config.json")
 
 module.exports = (client) => {
 	client.handleComponents = async () => {
@@ -38,6 +39,7 @@ module.exports = (client) => {
 					break;
 			}
 		}
+		if (!handlerLogs) return
 		console.log(italic.green("Components Handled"));
 	};
 };
