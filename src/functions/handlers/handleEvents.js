@@ -3,6 +3,7 @@ const { sanitizeJSFiles } = require("../.././utils/filterFunctions");
 const { italic } = require("chalk");
 const { connection } = require("mongoose");
 const chalk = require("chalk");
+const printIfEnabled = require("../../utils/handlerLog")
 
 function handleEvent(event, client) {
 	if (event.once) {
@@ -41,6 +42,6 @@ module.exports = (client) => {
 	client.handleEvents = async () => {
 		const eventFolders = fs.readdirSync("./src/events");
 		eventFolders.forEach((folder) => loadAndAssignEvents(folder, client));
-		console.log(italic.green("Events Handled"));
+		printIfEnabled(italic.green("Events Handled"));
 	};
 };

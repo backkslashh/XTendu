@@ -7,6 +7,7 @@ const {
 	botToken,
 	handlerLogs,
 } = require("../../config.json");
+const printIfEnabled = require("../../utils/handlerLog")
 const fs = require("fs");
 
 function createCommandStatusTable(commands) {
@@ -22,11 +23,11 @@ async function registerCommands(client) {
 	const rest = new REST({ version: "9" }).setToken(botToken);
 
 	try {
-		console.log(chalk.bold("Refreshing application commands..."));
+		printIfEnabled(chalk.bold("Refreshing application commands..."));
 		await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
 			body: client.commandArray,
 		});
-		console.log(
+		printIfEnabled(
 			chalk.green.bold("Successfully reloaded application commands")
 		);
 	} catch (error) {
@@ -52,8 +53,7 @@ function loadCommands(client, commandFolders) {
 			}
 		}
 	}
-	if(!handlerLogs) return
-	console.log(createCommandStatusTable(commandStatus));
+	printIfEnabled(createCommandStatusTable(commandStatus));
 }
 
 module.exports = (client) => {
