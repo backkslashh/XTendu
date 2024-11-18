@@ -5,10 +5,10 @@ reqNumber = {
 	required: true,
 };
 
-const inventoryItemSchema = {
+const inventoryItemSchema = new Schema({
 	id: { type: Number, required: true },
 	amount: { type: Number, required: true },
-};
+});
 
 const userSchema = new Schema({
 	userID: {
