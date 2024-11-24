@@ -4,6 +4,6 @@ module.exports = {
 	name: "disconnected",
 	on: true,
 	execute() {
-		console.log(chalk.green.bold("[Database Status]: Connected"));
+		console.log(chalk.red.bold("[Database Status]: Disconnected"));
 	},
 };

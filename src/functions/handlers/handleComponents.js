@@ -1,6 +1,7 @@
 const { readdirSync } = require("fs");
 const { sanitizeJSFiles } = require("../../utils/filterFunctions");
 const { italic, bold } = require("chalk");
+const printIfEnabled = require("../../utils/handlerLog")
 
 module.exports = (client) => {
 	client.handleComponents = async () => {
@@ -14,14 +15,14 @@ module.exports = (client) => {
 
 			switch (folder) {
 				case "buttons":
-					console.log(italic("Assigning Buttons..."));
+					printIfEnabled(italic("Assigning Buttons..."));
 					for (const file of componentFiles) {
 						const button = require(`../../components/${folder}/${file}`);
 						buttons.set(button.data.name, button);
 					}
 					break;
 				case "selectMenus":
-					console.log(italic("Assigning Select Menus..."));
+					printIfEnabled(italic("Assigning Select Menus..."));
 					for (const file of componentFiles) {
 						const menu = require(`../../components/${folder}/${file}`);
 						selectMenus.set(menu.data.name, menu);
@@ -38,6 +39,6 @@ module.exports = (client) => {
 					break;
 			}
 		}
-		console.log(italic.green("Components Handled"));
+		printIfEnabled(italic.green("Components Handled"));
 	};
 };

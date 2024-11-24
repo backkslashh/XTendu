@@ -16,7 +16,7 @@ Here are some features it has (or I plan to have in the future):
 
 ## How to set up XTendu for development or personal use
 
-Clone this repo, and add a config.json file with the following:
+Clone this repo, and add a config.json file in the source folder with the following:
 
 ```
 {
