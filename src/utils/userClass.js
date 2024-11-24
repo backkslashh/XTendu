@@ -76,9 +76,23 @@ module.exports = class User {
 	 * @param {String} statName
 	 * @returns {any}
 	 */
-	async getStat(statName) {
+	async getNumericalStat(statName) {
 		if (!this.isNumericalStat(statName)) {
-			throw new Error("Stat is invalid");
+			throw new Error("Stat is non-numerical");
+		}
+		const userDocument = await this.getUserDocument();
+		return userDocument[statName];
+	}
+
+	/**
+	 * @deprecated Use getNumbericalStat() instead.
+	 * @param {String} statName
+	 * @returns
+	 */
+
+	async getStat(statName) {
+		if (!this.isStat(statName)) {
+			throw new Error("Stat is non-numerical");
 		}
 		const userDocument = await this.getUserDocument();
 		return userDocument[statName];
@@ -124,7 +138,9 @@ module.exports = class User {
 
 		await this.updateNumericalStat("currency", newCurrency);
 
-		const incomeThisWeek = await this.getStat(TOTAL_INCOME_THIS_WEEK);
+		const incomeThisWeek = await this.getNumericalStat(
+			TOTAL_INCOME_THIS_WEEK
+		);
 		await this.updateNumericalStat(
 			TOTAL_INCOME_THIS_WEEK,
 			incomeThisWeek + amount
@@ -147,7 +163,7 @@ module.exports = class User {
 	}
 
 	async getTaxOwed() {
-		const income = await this.getStat(TOTAL_INCOME_THIS_WEEK);
+		const income = await this.getNumericalStat(TOTAL_INCOME_THIS_WEEK);
 		return income * percentTaxed * 0.01; // 0.01 to convert percent to decimal
 	}
 
