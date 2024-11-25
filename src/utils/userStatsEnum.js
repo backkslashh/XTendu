@@ -2,6 +2,7 @@ module.exports = Object.freeze({
 	USER_ID: "userID",
 	CURRENCY: "currency",
 	JOB_ID: "jobID",
+	JOB_LEVEL: "jobLevel",
 	INTELLIGENCE: "intelligence",
 	STRENGTH: "strength",
 	LEVEL: "level",

@@ -18,6 +18,7 @@ const userSchema = new Schema({
 	},
 	currency: reqNumber,
 	jobID: reqNumber,
+	jobLevel: reqNumber,
 	intelligence: reqNumber,
 	strength: reqNumber,
 	level: reqNumber,
