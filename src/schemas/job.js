@@ -5,36 +5,29 @@ reqNumber = {
 	required: true,
 };
 
-const inventoryItemSchema = new Schema({
-	id: { type: Number, required: true },
-	amount: { type: Number, required: true },
-});
+reqString = {
+	type: String,
+	required: true,
+};
 
-const userSchema = new Schema({
-	userID: {
-		type: Number,
-		index: { unique: true, dropDups: true },
-		required: true,
-	},
-	currency: reqNumber,
+const jobSchema = new Schema({
+	jobIcon: reqString, // An emoji that goes before a job title
+	jobTitle: reqString,
 	jobID: reqNumber,
-	intelligence: reqNumber,
-	strength: reqNumber,
-	level: reqNumber,
-	xp: reqNumber,
-	inventory: {
-		food: [inventoryItemSchema],
-		art: [inventoryItemSchema],
-		permits: [{ type: Number }],
-	},
-	stock: [
-		{
-			companyID: Number,
-			amountOfStocks: Number,
-		},
-	],
-	totalIncomeThisWeek: Number,
-	expensesThisWeek: Number,
+	companyAttachmentID: reqNumber, // A job is associated with this company
+
+	unitsPerWorkAction: reqNumber, // After running a work action, you will see the message, "You have {pastTenseAction} {unitsPerWorkAction} {unitMeasurement}!"
+	currencyPerUnit: reqNumber, // Amount of currency earned per unit
+	XPPerUnit: reqNumber, // Amount of XP earned per unit
+	maxActionsPerHour: reqNumber,
+
+	minInteligenceRequirement: reqNumber,
+	minStrengthRequirement: reqNumber,
+
+	unitMeasurement: reqString, // After running a work action, you will see the message, "You have {pastTenseAction} {unitsPerWorkAction} {unitMeasurement}!"
+	pastTenseAction: reqString, // After running a work action, you will see the message, "You have {pastTenseAction} {unitsPerWorkAction} {unitMeasurement}!"
+	presentProgressiveAction: reqString, // When clocking in, you will be greeted with, "To start {presentProgressiveAction} run..."
+	infinitiveAction: reqString, // When working, you run the command /work {infiniteAction}
 });
 
-module.exports = model("User", userSchema);
+module.exports = model("Job", jobSchema);

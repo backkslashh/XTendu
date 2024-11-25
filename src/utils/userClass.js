@@ -147,6 +147,7 @@ module.exports = class User {
 		);
 
 		return newCurrency;
+		// TODO: Reset TOTAL_INCOME_THIS_WEEK every week
 	}
 
 	/**

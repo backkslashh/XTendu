@@ -33,8 +33,8 @@ const userSchema = new Schema({
 			amountOfStocks: Number,
 		},
 	],
-	totalIncomeThisWeek: Number,
-	expensesThisWeek: Number,
+	totalIncomeThisWeek: reqNumber,
+	expensesThisWeek: reqNumber,
 });
 
 module.exports = model("User", userSchema);

@@ -1,13 +1,8 @@
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const chalk = require("chalk");
-const {
-	clientId,
-	guildId,
-	botToken,
-	handlerLogs,
-} = require("../../config.json");
-const printIfEnabled = require("../../utils/handlerLog")
+const { clientId, guildId, botToken } = require("../../config.json");
+const printIfEnabled = require("../../utils/handlerLog");
 const fs = require("fs");
 
 function createCommandStatusTable(commands) {
