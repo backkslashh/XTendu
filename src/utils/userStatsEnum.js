@@ -11,4 +11,7 @@ module.exports = Object.freeze({
 	STOCK: "stock",
 	TOTAL_INCOME_THIS_WEEK: "totalIncomeThisWeek",
 	EXPENSES_THIS_WEEK: "expensesThisWeek",
+	IS_CLOCKED_IN: "isClockedIn",
+	LAST_DAILY_CLAIMED: "lastDailyClaimed",
+	DAILY_STREAK: "dailyStreak",
 });

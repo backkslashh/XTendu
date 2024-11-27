@@ -1,7 +1,7 @@
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const chalk = require("chalk");
-const { clientId, guildId, botToken } = require("../../config.json");
+const { clientId, guildIds, botToken } = require("../../config.json");
 const printIfEnabled = require("../../utils/handlerLog");
 const fs = require("fs");
 
@@ -19,11 +19,15 @@ async function registerCommands(client) {
 
 	try {
 		printIfEnabled(chalk.bold("Refreshing application commands..."));
-		await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
-			body: client.commandArray,
-		});
+		for (const guildId of guildIds) {
+			await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+				body: client.commandArray,
+			});
+		}
 		printIfEnabled(
-			chalk.green.bold("Successfully reloaded application commands")
+			chalk.green.bold(
+				"Successfully reloaded application commands for all guilds"
+			)
 		);
 	} catch (error) {
 		console.error(chalk.red.bold("Error in handleCommands.js"), error);

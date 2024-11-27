@@ -77,15 +77,25 @@ module.exports = {
 		const { commandName } = interaction;
 		const command = commands.get(commandName);
 
+		const user = new User(interaction.user.id);
+
 		if (!command) return;
 		if (command.economyBased) {
-			user = new User(interaction.user.id);
 			const documentExists = await pleaseRegister(user, interaction);
 			if (!documentExists) return;
 		}
 		if (command.administratorOnly) {
 			if (!administrators.includes(interaction.user.id)) {
 				interaction.reply("You are not permitted to run this command!");
+				return;
+			}
+		}
+		if (command.jobOnly) {
+			const hasJob = (await user.getStat("jobID")) != 0;
+			if (!hasJob) {
+				interaction.reply(
+					"Woops! It seems like you don't have an XTendu job! [How to apply for a job](https://google.com)"
+				);
 				return;
 			}
 		}

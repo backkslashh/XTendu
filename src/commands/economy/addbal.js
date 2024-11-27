@@ -3,6 +3,7 @@ const User = require("../../utils/userClass");
 
 module.exports = {
 	economyBased: true,
+	administratorOnly: true,
 	data: new SlashCommandBuilder()
 		.setName("addbal")
 		.setDescription(
@@ -23,6 +24,21 @@ module.exports = {
 
 		interaction.reply({
 			content: `Your new balance is: ${await user.addCurrency(
+				amountToAdd
+			)}`,
+		});
+	},
+	async legacyExecute(message, args, client) {
+		if (!args[0]) return message.reply("Invalid args!");
+		const amountToAdd = parseInt(args[0]);
+		if (!Number.isInteger(amountToAdd))
+			return message.reply("Amount to add must be an integer!");
+
+		const authorUserID = message.author.id;
+		const user = new User(authorUserID);
+
+		message.reply({
+			content: `Your new balance is ${await user.addCurrency(
 				amountToAdd
 			)}`,
 		});

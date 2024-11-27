@@ -36,6 +36,12 @@ const userSchema = new Schema({
 	],
 	totalIncomeThisWeek: reqNumber,
 	expensesThisWeek: reqNumber,
+	isClockedIn: {
+		type: Boolean,
+		required: true,
+	},
+	lastDailyClaimed: reqNumber,
+	dailyStreak: reqNumber,
 });
 
 module.exports = model("User", userSchema);

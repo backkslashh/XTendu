@@ -1,6 +1,11 @@
 const userSchema = require("../schemas/user");
 const { percentTaxed } = require("../config.json");
-const { TOTAL_INCOME_THIS_WEEK } = require("../utils/userStatsEnum");
+const {
+	TOTAL_INCOME_THIS_WEEK,
+	IS_CLOCKED_IN,
+	LAST_DAILY_CLAIMED,
+	DAILY_STREAK,
+} = require("../utils/userStatsEnum");
 
 module.exports = class User {
 	constructor(userID) {
@@ -26,8 +31,11 @@ module.exports = class User {
 				permits: [],
 			},
 			stock: [],
-			totalIncomeThisWeek: 500,
+			totalIncomeThisWeek: 0,
 			expensesThisWeek: 0,
+			isClockedIn: false,
+			lastDailyClaimed: 0,
+			dailyStreak: 0,
 		});
 		await userDocumentModel.save();
 		return true;
@@ -58,15 +66,7 @@ module.exports = class User {
 		return topLevelFields.has(stat);
 	}
 
-	/**
-	 *
-	 * @param {String} statName
-	 * @param {Number} newValue
-	 */
-	async updateNumericalStat(statName, newValue) {
-		if (!this.isNumericalStat(statName)) {
-			throw new Error("Attempted to update stat that does not exist.");
-		}
+	/** // *1000 to convert milliseconds to seconds
 		const userDocument = await this.getUserDocument();
 		userDocument[statName] = newValue;
 		await userDocument.save();
@@ -85,15 +85,18 @@ module.exports = class User {
 		return userDocument[statName];
 	}
 
-	/**
-	 * @deprecated Use getNumbericalStat() instead.
-	 * @param {String} statName
-	 * @returns
-	 */
+	async updateStat(statName, newValue) {
+		if (!this.isStat(statName)) {
+			throw new Error("Stat does not exist");
+		}
+		const userDocument = await this.getUserDocument();
+		userDocument[statName] = newValue;
+		await userDocument.save();
+	}
 
 	async getStat(statName) {
 		if (!this.isStat(statName)) {
-			throw new Error("Stat is non-numerical");
+			throw new Error("Stat does not exist");
 		}
 		const userDocument = await this.getUserDocument();
 		return userDocument[statName];
@@ -137,15 +140,12 @@ module.exports = class User {
 		const currentCurrency = user ? user.currency : 0;
 		const newCurrency = currentCurrency + amount;
 
-		await this.updateNumericalStat("currency", newCurrency);
+		await this.updateStat("currency", newCurrency);
 
 		const incomeThisWeek = await this.getNumericalStat(
 			TOTAL_INCOME_THIS_WEEK
 		);
-		await this.updateNumericalStat(
-			TOTAL_INCOME_THIS_WEEK,
-			incomeThisWeek + amount
-		);
+		await this.updateStat(TOTAL_INCOME_THIS_WEEK, incomeThisWeek + amount);
 
 		return newCurrency;
 		// TODO: Reset TOTAL_INCOME_THIS_WEEK every week
@@ -173,5 +173,36 @@ module.exports = class User {
 		const amountOwed = await this.getTaxOwed(TOTAL_INCOME_THIS_WEEK);
 		await this.updateNumericalStat(TOTAL_INCOME_THIS_WEEK, 0);
 		return await this.subtractCurrency(amountOwed);
+	}
+
+	async clockIn() {
+		await this.updateStat(IS_CLOCKED_IN, true);
+	}
+
+	async clockOut() {
+		await this.updateStat(IS_CLOCKED_IN, false);
+	}
+
+	async canClaimDaily() {
+		const lastDailyClaimed = this.getStat(LAST_DAILY_CLAIMED);
+		const now = Date.now();
+		const oneDay = 86400 * 1000;
+		if (now - lastDailyClaimed > oneDay) return true;
+		return false;
+	}
+
+	async calculateDailyGold() {
+		const dailyStreak = await this.getStat(DAILY_STREAK);
+		const dailyStreakCapped = Math.min(dailyStreak, 50);
+		return dailyStreakCapped ** 2 + 20 * dailyStreakCapped + 200; // f(x) = x^2 + x + 200
+	}
+
+	async claimDailyGold() {
+		const canClaimDaily = await this.canClaimDaily();
+		if (!canClaimDaily) return;
+
+		const goldToGive = this.calculateDailyGold();
+		this.addCurrency(await goldToGive);
+		this.updateStat(LAST_DAILY_CLAIMED, Date.now());
 	}
 };
