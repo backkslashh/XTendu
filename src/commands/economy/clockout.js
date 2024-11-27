@@ -27,7 +27,7 @@ module.exports = {
 
 		const isClockedIn = await user.getStat("isClockedIn");
 		if (!isClockedIn) {
-			interaction.reply(
+			message.reply(
 				"You are already clocked out! To clock in, run /clockin"
 			);
 			return;
