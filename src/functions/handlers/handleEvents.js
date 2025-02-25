@@ -13,15 +13,20 @@ function handleEvent(event, client) {
 	}
 }
 
+function handleClientEvents(client, folder, eventFiles) {
+	eventFiles.forEach((file) => {
+		const event = require(`../../events/${folder}/${file}`);
+		handleEvent(event, client);
+	});
+
+}
+
 function loadAndAssignEvents(folder, client) {
 	const eventFiles = sanitizeJSFiles(
 		fs.readdirSync(`./src/events/${folder}`)
 	);
 	if (folder == "client") {
-		eventFiles.forEach((file) => {
-			const event = require(`../../events/${folder}/${file}`);
-			handleEvent(event, client);
-		});
+		handleClientEvents(client, folder, eventFiles)
 	} else if (folder == "mongo") {
 		for (const file of eventFiles) {
 			const event = require(`../../events/${folder}/${file}`);
