@@ -5,17 +5,9 @@ const { sanitizeJSFiles } = require("./utils/filterFunctions");
 const fs = require("fs");
 const chalk = require("chalk");
 
-// XTendu Ascii Art
-// TODO: Move to utils
-const figlet = require("figlet");
-figlet("XTendu", function (err, data) {
-	if (err) {
-		console.log("Something went wrong...");
-		console.dir(err);
-		return;
-	}
-	console.log(data);
-});
+// ascii art title
+const printTitle = require("./utils/startupText");
+printTitle("XTendu");
 
 const clientIntents = [
 	GatewayIntentBits.MessageContent,
