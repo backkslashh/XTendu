@@ -143,7 +143,6 @@ module.exports = class User {
 
 		return newCurrency;
 		// TODO: Reset TOTAL_INCOME_THIS_WEEK every week
-		// JEREMY: What the fuck is this??? Backslash are you high while coding or should we just fucking fire you at this point
 	}
 
 	/**
