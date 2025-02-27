@@ -66,12 +66,6 @@ module.exports = class User {
 		return topLevelFields.has(stat);
 	}
 
-	/** // *1000 to convert milliseconds to seconds
-		const userDocument = await this.getUserDocument();
-		userDocument[statName] = newValue;
-		await userDocument.save();
-	}
-
 	/**
 	 *
 	 * @param {String} statName
@@ -171,7 +165,7 @@ module.exports = class User {
 
 	async taxUser() {
 		const amountOwed = await this.getTaxOwed(TOTAL_INCOME_THIS_WEEK);
-		await this.updateNumericalStat(TOTAL_INCOME_THIS_WEEK, 0);
+		await this.updateStat(TOTAL_INCOME_THIS_WEEK, 0);
 		return await this.subtractCurrency(amountOwed);
 	}
 
