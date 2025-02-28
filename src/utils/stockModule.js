@@ -136,9 +136,228 @@ class StockInfoFetcher {
         const timestamp = new Date(quote.regularMarketTime * 1000);
         return new StockInfo(acronym, companyfullname, price, currency, timestamp);
     }
+
+    /**
+     * Fetches historical stock information for a given acronym at a specific timestamp.
+     * @param {string} acronym - The stock ticker symbol (e.g., "AAPL").
+     * @param {Date} timestamp - The historical date to fetch data for.
+     * @returns {Promise<StockInfo>} A promise that resolves to a StockInfo object.
+     * @throws {Error} If the acronym is invalid, data cannot be retrieved, or stock wasn't available at the timestamp.
+     */
+    async getHistoricalStockInfo(acronym, timestamp) {
+        try {
+            const queryDate = timestamp.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+            
+            const historicalData = await yahooFinance.historical(acronym, {
+                period1: timestamp,
+                period2: new Date(timestamp.getTime() + 24 * 60 * 60 * 1000) // Next day
+            });
+
+            if (!historicalData || historicalData.length === 0) {
+                throw new Error(`No stock data available for ${acronym} on ${queryDate}`);
+            }
+
+            // Get the closest data point to the requested timestamp
+            const dataPoint = historicalData[0];
+            
+            const quoteData = await yahooFinance.quote(acronym);
+            const companyName = quoteData.longName || quoteData.shortName || "Unknown";
+            
+            return new StockInfo(
+                acronym,
+                companyName,
+                dataPoint.close, // Using closing price
+                quoteData.currency,
+                new Date(dataPoint.date)
+            );
+        } catch (error) {
+            if (error.message.includes('No stock data available')) {
+                throw error;
+            }
+            if (error.statusCode === 404 || error.name === 'HistoricalError') {
+                throw new Error(`${acronym} was not publicly traded on the requested date`);
+            }
+            throw new Error(`Failed to fetch historical data for ${acronym}: ${error.message}`);
+        }
+    }
+
+    /**
+     * Fetches stock information for a given date string.
+     * @param {string} acronym - The stock ticker symbol (e.g., "AAPL").
+     * @param {string} dateString - Date string in YYYY-MM-DD format.
+     * @returns {Promise<StockInfo>} A promise that resolves to a StockInfo object.
+     */
+    async getStockInfoByDateString(acronym, dateString) {
+        const timestamp = new Date(dateString);
+        if (isNaN(timestamp.getTime())) {
+            throw new Error('Invalid date format. Please use YYYY-MM-DD format.');
+        }
+        return this.getHistoricalStockInfo(acronym, timestamp);
+    }
+
+    /**
+     * Fetches stock information for a relative time in the past.
+     * @param {string} acronym - The stock ticker symbol (e.g., "AAPL").
+     * @param {number} days - Number of days in the past.
+     * @returns {Promise<StockInfo>} A promise that resolves to a StockInfo object.
+     */
+    async getStockInfoDaysAgo(acronym, days) {
+        if (typeof days !== 'number' || days <= 0) {
+            throw new Error('Days must be a positive number');
+        }
+        const timestamp = new Date();
+        timestamp.setDate(timestamp.getDate() - days);
+        return this.getHistoricalStockInfo(acronym, timestamp);
+    }
+
+    /**
+     * Fetches stock information for a specific month and year.
+     * @param {string} acronym - The stock ticker symbol (e.g., "AAPL").
+     * @param {number} year - The year.
+     * @param {number} month - The month (1-12).
+     * @returns {Promise<StockInfo>} A promise that resolves to a StockInfo object.
+     */
+    async getStockInfoForMonth(acronym, year, month) {
+        if (month < 1 || month > 12) {
+            throw new Error('Month must be between 1 and 12');
+        }
+        
+        const startDate = new Date(year, month - 1, 1);
+        return this.getHistoricalStockInfo(acronym, startDate);
+    }
+    // TODO Add more methods for fetching stock information and returning as stockInfoSeries objects
+}
+
+class StockInfoSeries {
+    /**
+     * Creates an instance of StockInfoSeries to hold StockInfo objects over a time period.
+     * @param {Date} startPeriod - The start date of the series.
+     * @param {Date} endPeriod - The end date of the series.
+     */
+    constructor(startPeriod, endPeriod) {
+        if (!(startPeriod instanceof Date) || !(endPeriod instanceof Date)) {
+            throw new Error('startPeriod and endPeriod must be Date objects');
+        }
+        
+        if (startPeriod >= endPeriod) {
+            throw new Error('startPeriod must be earlier than endPeriod');
+        }
+        
+        this.startPeriod = startPeriod;
+        this.endPeriod = endPeriod;
+        this.stocks = [];
+    }
+
+    /**
+     * Adds a StockInfo object to the series.
+     * @param {StockInfo} stockInfo - The StockInfo object to add.
+     * @throws {Error} If the stockInfo is not valid or outside the time period.
+     */
+    addStock(stockInfo) {
+        if (!(stockInfo instanceof StockInfo)) {
+            throw new Error('stockInfo must be a StockInfo object');
+        }
+        
+        if (stockInfo.timestamp < this.startPeriod || stockInfo.timestamp > this.endPeriod) {
+            throw new Error('StockInfo timestamp is outside the defined time period');
+        }
+        
+        this.stocks.push(stockInfo);
+        // Sort by timestamp to maintain chronological order
+        this.stocks.sort((a, b) => a.timestamp - b.timestamp);
+    }
+
+    /**
+     * Bulk adds multiple StockInfo objects to the series.
+     * @param {Array<StockInfo>} stockInfoArray - Array of StockInfo objects.
+     */
+    addStocks(stockInfoArray) {
+        if (!Array.isArray(stockInfoArray)) {
+            throw new Error('stockInfoArray must be an array');
+        }
+        
+        for (const stockInfo of stockInfoArray) {
+            this.addStock(stockInfo);
+        }
+    }
+
+    /**
+     * Gets all StockInfo objects in the series.
+     * @returns {Array<StockInfo>} Array of StockInfo objects.
+     */
+    getAllStocks() {
+        return [...this.stocks];
+    }
+
+    /**
+     * Gets StockInfo objects within a specific time range.
+     * @param {Date} from - Start date.
+     * @param {Date} to - End date.
+     * @returns {Array<StockInfo>} Array of StockInfo objects within the range.
+     */
+    getStocksInRange(from, to) {
+        return this.stocks.filter(stock => 
+            stock.timestamp >= from && stock.timestamp <= to
+        );
+    }
+
+    /**
+     * Gets the latest StockInfo object in the series.
+     * @returns {StockInfo|null} The latest StockInfo object or null if empty.
+     */
+    getLatestStock() {
+        if (this.stocks.length === 0) return null;
+        return this.stocks[this.stocks.length - 1];
+    }
+
+    /**
+     * Gets the earliest StockInfo object in the series.
+     * @returns {StockInfo|null} The earliest StockInfo object or null if empty.
+     */
+    getEarliestStock() {
+        if (this.stocks.length === 0) return null;
+        return this.stocks[0];
+    }
+
+    /**
+     * Calculates price change over the entire period.
+     * @returns {number|null} Price change as a percentage or null if insufficient data.
+     */
+    calculatePriceChange() {
+        const earliest = this.getEarliestStock();
+        const latest = this.getLatestStock();
+        
+        if (!earliest || !latest) return null;
+        
+        return ((latest.price - earliest.price) / earliest.price) * 100;
+    }
+
+    /**
+     * Calculates the average price over the period.
+     * @returns {number|null} Average price or null if the series is empty.
+     */
+    calculateAveragePrice() {
+        if (this.stocks.length === 0) return null;
+        
+        const sum = this.stocks.reduce((total, stock) => total + stock.price, 0);
+        return sum / this.stocks.length;
+    }
+
+    /**
+     * Returns a JSON representation of the StockInfoSeries.
+     * @returns {object} A JSON representation of the series.
+     */
+    toJSON() {
+        return {
+            startPeriod: this.startPeriod.toISOString(),
+            endPeriod: this.endPeriod.toISOString(),
+            stocks: this.stocks.map(stock => stock.toJSON())
+        };
+    }
 }
 
 module.exports = {
     StockInfo,
-    StockInfoFetcher
+    StockInfoFetcher,
+    StockInfoSeries,
 };

@@ -69,6 +69,125 @@ describe('StockInfoFetcher', () => {
         const acronym = 'INVALID';
         await expect(fetcher.getStockInfo(acronym)).rejects.toThrow('Invalid symbol');
     });
+
+    it('should fetch historical stock information correctly', async () => {
+        const mockHistorical = [{
+            date: '2023-01-15T00:00:00.000Z',
+            close: 150.82
+        }];
+        
+        const mockQuote = {
+            longName: 'Apple Inc.',
+            currency: 'USD'
+        };
+        
+        yahooFinance.historical.mockResolvedValue(mockHistorical);
+        yahooFinance.quote.mockResolvedValue(mockQuote);
+        
+        const acronym = 'AAPL';
+        const timestamp = new Date('2023-01-15');
+        const stockInfo = await fetcher.getHistoricalStockInfo(acronym, timestamp);
+        
+        expect(stockInfo.acronym).toBe(acronym);
+        expect(stockInfo.companyfullname).toBe('Apple Inc.');
+        expect(stockInfo.price).toBe(150.82);
+        expect(stockInfo.currency).toBe('USD');
+        expect(stockInfo.timestamp).toEqual(new Date(mockHistorical[0].date));
+    });
+    
+    it('should throw error when no historical data is available', async () => {
+        yahooFinance.historical.mockResolvedValue([]);
+        
+        const acronym = 'AAPL';
+        const timestamp = new Date('2023-01-15');
+        
+        await expect(fetcher.getHistoricalStockInfo(acronym, timestamp))
+            .rejects.toThrow('No stock data available for AAPL on 2023-01-15');
+    });
+    
+    it('should throw error when stock was not publicly traded on date', async () => {
+        const notFoundError = new Error('Not found');
+        notFoundError.statusCode = 404;
+        yahooFinance.historical.mockRejectedValue(notFoundError);
+        
+        await expect(fetcher.getHistoricalStockInfo('AAPL', new Date('1900-01-01')))
+            .rejects.toThrow('AAPL was not publicly traded on the requested date');
+    });
+    
+    it('should fetch stock info by date string correctly', async () => {
+        const mockHistorical = [{
+            date: '2023-01-15T00:00:00.000Z',
+            close: 150.82
+        }];
+        
+        yahooFinance.historical.mockResolvedValue(mockHistorical);
+        yahooFinance.quote.mockResolvedValue({ longName: 'Apple Inc.', currency: 'USD' });
+        
+        const stockInfo = await fetcher.getStockInfoByDateString('AAPL', '2023-01-15');
+        
+        expect(stockInfo.acronym).toBe('AAPL');
+        expect(stockInfo.price).toBe(150.82);
+    });
+    
+    it('should throw error for invalid date string', async () => {
+        await expect(fetcher.getStockInfoByDateString('AAPL', 'invalid-date'))
+            .rejects.toThrow('Invalid date format');
+    });
+    
+    it('should fetch stock info for days ago correctly', async () => {
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2023-10-15'));
+        
+        const mockHistorical = [{
+            date: '2023-10-10T00:00:00.000Z',
+            close: 150.82
+        }];
+        
+        yahooFinance.historical.mockResolvedValue(mockHistorical);
+        yahooFinance.quote.mockResolvedValue({ longName: 'Apple Inc.', currency: 'USD' });
+        
+        const stockInfo = await fetcher.getStockInfoDaysAgo('AAPL', 5);
+        
+        expect(stockInfo.acronym).toBe('AAPL');
+        expect(stockInfo.price).toBe(150.82);
+        
+        jest.useRealTimers();
+    });
+    
+    it('should throw error for invalid days value', async () => {
+        await expect(fetcher.getStockInfoDaysAgo('AAPL', -1))
+            .rejects.toThrow('Days must be a positive number');
+        
+        await expect(fetcher.getStockInfoDaysAgo('AAPL', 0))
+            .rejects.toThrow('Days must be a positive number');
+        
+        await expect(fetcher.getStockInfoDaysAgo('AAPL', 'not-a-number'))
+            .rejects.toThrow('Days must be a positive number');
+    });
+    
+    it('should fetch stock info for specific month correctly', async () => {
+        const mockHistorical = [{
+            date: '2023-06-01T00:00:00.000Z',
+            close: 145.23
+        }];
+        
+        yahooFinance.historical.mockResolvedValue(mockHistorical);
+        yahooFinance.quote.mockResolvedValue({ longName: 'Apple Inc.', currency: 'USD' });
+        
+        const stockInfo = await fetcher.getStockInfoForMonth('AAPL', 2023, 6);
+        
+        expect(stockInfo.acronym).toBe('AAPL');
+        expect(stockInfo.price).toBe(145.23);
+        expect(stockInfo.timestamp).toEqual(new Date(mockHistorical[0].date));
+    });
+    
+    it('should throw error for invalid month value', async () => {
+        await expect(fetcher.getStockInfoForMonth('AAPL', 2023, 0))
+            .rejects.toThrow('Month must be between 1 and 12');
+        
+        await expect(fetcher.getStockInfoForMonth('AAPL', 2023, 13))
+            .rejects.toThrow('Month must be between 1 and 12');
+    });
 });
 
 describe('StockInfo', () => {
