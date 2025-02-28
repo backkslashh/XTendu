@@ -18,7 +18,8 @@
 		"discord.js": "^14.15.3",
 		"dotenv": "^16.4.5",
 		"figlet": "^1.7.0",
-		"mongoose": "^8.5.1"
+		"mongoose": "^8.5.1",
+		"yahoo-finance2": "^2.13.3"
 	},
 	"devDependencies": {
 		"jest": "^29.7.0"
