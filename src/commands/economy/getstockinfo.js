@@ -21,12 +21,10 @@ module.exports = {
 		const stockSymbol = interaction.options.getString("symbol");
         const stockInfoFetcherObject = new StockInfoFetcher()
         const stockInfo = await stockInfoFetcherObject.getStockInfo(stockSymbol)
-        // acronym, companyfullname, price, currency, timestamp
         if (!stockInfo) {
             return interaction.reply({ content: `Could not find stock information for symbol ${stockSymbol}`, ephemeral: true });
         }
 
-        // Create an embed to display the stock information
         const stockEmbed = {
             color: 0x0099ff, // Blue color
             title: `📊 Stock Info: ${stockInfo.companyfullname}`,
