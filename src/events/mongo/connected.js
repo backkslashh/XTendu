@@ -5,7 +5,7 @@ module.exports = {
 	once: true,
 	on: false,
 	execute(error) {
-		console.error(
+		console.log(
 			chalk.bold.green(`[Database Status]: CONNECTED TO DATABASE`)
 		);
 	},
