@@ -54,7 +54,7 @@ class StockInfo {
      */
     getPriceWithCurrency() {
         const currencySymbols = {
-            USD: '$', 
+            USD: '$',
             EUR: '€',
             GBP: '£',
             JPY: '¥',
@@ -81,15 +81,15 @@ class StockInfo {
         const now = new Date();
         const diffMs = now - this.timestamp;
         const diffSec = Math.floor(diffMs / 1000);
-        
+
         if (diffSec < 60) return `${diffSec} seconds ago`;
-        
+
         const diffMin = Math.floor(diffSec / 60);
         if (diffMin < 60) return `${diffMin} minutes ago`;
-        
+
         const diffHr = Math.floor(diffMin / 60);
         if (diffHr < 24) return `${diffHr} hours ago`;
-        
+
         const diffDays = Math.floor(diffHr / 24);
         return `${diffDays} days ago`;
     }
@@ -147,7 +147,7 @@ class StockInfoFetcher {
     async getHistoricalStockInfo(acronym, timestamp) {
         try {
             const queryDate = timestamp.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-            
+
             const historicalData = await yahooFinance.historical(acronym, {
                 period1: timestamp,
                 period2: new Date(timestamp.getTime() + 24 * 60 * 60 * 1000) // Next day
@@ -159,10 +159,10 @@ class StockInfoFetcher {
 
             // Get the closest data point to the requested timestamp
             const dataPoint = historicalData[0];
-            
+
             const quoteData = await yahooFinance.quote(acronym);
             const companyName = quoteData.longName || quoteData.shortName || "Unknown";
-            
+
             return new StockInfo(
                 acronym,
                 companyName,
@@ -221,11 +221,48 @@ class StockInfoFetcher {
         if (month < 1 || month > 12) {
             throw new Error('Month must be between 1 and 12');
         }
-        
         const startDate = new Date(year, month - 1, 1);
         return this.getHistoricalStockInfo(acronym, startDate);
     }
-    // TODO Add more methods for fetching stock information and returning as stockInfoSeries objects
+
+    /**
+     * Fetches intraday stock data for the last 24 hours at specified intervals.
+     * @param {string} acronym - The stock ticker symbol (e.g., "AAPL").
+     * @param {string} companyfullname - The full name of the company.
+     * @param {string} currency - The currency of the stock price.
+     * @param {string} [interval='30m'] - The interval between data points (e.g., '30m' for 30 minutes).
+     * @returns {Promise<StockInfoSeries>} A promise that resolves to a StockInfoSeries object.
+     * @throws {Error} If no data is available or the request fails.
+     */
+    async getIntradayStockInfoSeries(acronym, companyfullname, currency, interval = '30m') {
+        const endDate = new Date();
+        const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+        
+        const chartData = await yahooFinance.chart(acronym, {
+            period1: Math.floor(startDate.getTime() / 1000),
+            period2: Math.floor(endDate.getTime() / 1000),
+            interval: interval
+        });
+        
+        if (!chartData || !chartData.quotes || chartData.quotes.length === 0) {
+            throw new Error(`No intraday data available for ${acronym}`);
+        }
+        
+        const stockInfoSeries = new StockInfoSeries(startDate, endDate);
+        
+        for (const quote of chartData.quotes) {
+            const stockInfo = new StockInfo(
+                acronym,
+                companyfullname,
+                quote.close,
+                currency,
+                new Date(quote.date)
+            );
+            stockInfoSeries.addStock(stockInfo);
+        }
+        
+        return stockInfoSeries;
+    }
 }
 
 class StockInfoSeries {
@@ -238,11 +275,11 @@ class StockInfoSeries {
         if (!(startPeriod instanceof Date) || !(endPeriod instanceof Date)) {
             throw new Error('startPeriod and endPeriod must be Date objects');
         }
-        
+
         if (startPeriod >= endPeriod) {
             throw new Error('startPeriod must be earlier than endPeriod');
         }
-        
+
         this.startPeriod = startPeriod;
         this.endPeriod = endPeriod;
         this.stocks = [];
@@ -257,11 +294,11 @@ class StockInfoSeries {
         if (!(stockInfo instanceof StockInfo)) {
             throw new Error('stockInfo must be a StockInfo object');
         }
-        
+
         if (stockInfo.timestamp < this.startPeriod || stockInfo.timestamp > this.endPeriod) {
             throw new Error('StockInfo timestamp is outside the defined time period');
         }
-        
+
         this.stocks.push(stockInfo);
         // Sort by timestamp to maintain chronological order
         this.stocks.sort((a, b) => a.timestamp - b.timestamp);
@@ -275,7 +312,7 @@ class StockInfoSeries {
         if (!Array.isArray(stockInfoArray)) {
             throw new Error('stockInfoArray must be an array');
         }
-        
+
         for (const stockInfo of stockInfoArray) {
             this.addStock(stockInfo);
         }
@@ -296,7 +333,7 @@ class StockInfoSeries {
      * @returns {Array<StockInfo>} Array of StockInfo objects within the range.
      */
     getStocksInRange(from, to) {
-        return this.stocks.filter(stock => 
+        return this.stocks.filter(stock =>
             stock.timestamp >= from && stock.timestamp <= to
         );
     }
@@ -326,9 +363,9 @@ class StockInfoSeries {
     calculatePriceChange() {
         const earliest = this.getEarliestStock();
         const latest = this.getLatestStock();
-        
+
         if (!earliest || !latest) return null;
-        
+
         return ((latest.price - earliest.price) / earliest.price) * 100;
     }
 
@@ -338,7 +375,7 @@ class StockInfoSeries {
      */
     calculateAveragePrice() {
         if (this.stocks.length === 0) return null;
-        
+
         const sum = this.stocks.reduce((total, stock) => total + stock.price, 0);
         return sum / this.stocks.length;
     }
